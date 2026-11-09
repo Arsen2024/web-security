@@ -1,0 +1,69 @@
+### 0. Get CSRF Token
+GET http://localhost:8080/csrf
+Authorization: Basic admin admin123
+Accept: application/json
+
+> {%
+    client.global.set("csrfToken", response.body["token"]);
+%}
+
+###
+
+### 1. GET All Cars
+GET http://localhost:8080/cars
+Authorization: Basic user user123
+Accept: application/json
+
+###
+
+### 2. GET One Car
+GET http://localhost:8080/cars/6ab9022ce0bb4abaad270d67
+Authorization: Basic user user123
+Accept: application/json
+
+###
+
+
+### 3. CREATE Car
+POST http://localhost:8080/cars
+Authorization: Basic admin admin123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "brand": "Audi",
+  "model": "A6",
+  "year": 2025
+}
+
+> {%
+    client.global.set("carId", response.body["id"]);
+%}
+
+###
+
+
+### 4. UPDATE Car
+PUT http://localhost:8080/cars/{{carId}}
+Authorization: Basic admin admin123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "brand": "Audi",
+  "model": "A7",
+  "year": 2026
+}
+
+###
+
+
+### 5. DELETE Car
+DELETE http://localhost:8080/cars/{{carId}}
+Authorization: Basic superuser super123
+X-XSRF-TOKEN: {{csrfToken}}
+Accept: application/json
+
+###

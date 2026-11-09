@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="cars")
-public class Car {
+public class Car extends Auditable {
     @Id
     private String id;
     private String brand;
