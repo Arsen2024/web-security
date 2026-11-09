@@ -1,7 +1,9 @@
+
 package com.example.carmanagementsystem;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -11,20 +13,38 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Configuration
 public class SecurityConfig {
+
     @Bean
     public UserDetailsService userDetailsService(
             PasswordEncoder passwordEncoder
     ) {
         UserDetails user = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("1234"))
+                .username("user")
+                .password(passwordEncoder.encode("user123"))
                 .roles("USER")
                 .build();
 
-        return new InMemoryUserDetailsManager(user);
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN")
+                .build();
+
+        UserDetails superuser = User.builder()
+                .username("superuser")
+                .password(passwordEncoder.encode("super123"))
+                .roles("SUPERUSER")
+                .build();
+
+        return new InMemoryUserDetailsManager(
+                user,
+                admin,
+                superuser
+        );
     }
 
     @Bean
@@ -35,13 +55,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
-    ) throws Exception {
+    ) {
         http
-                .authorizeHttpRequests(auth ->
-                        auth.anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/cars",
+                                "/cars/**"
+                        ).hasAnyRole(
+                                "USER",
+                                "ADMIN",
+                                "SUPERUSER"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/cars"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SUPERUSER"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/cars/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SUPERUSER"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/cars/**"
+                        ).hasRole("SUPERUSER")
+
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable());
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

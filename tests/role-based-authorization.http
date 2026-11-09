@@ -1,0 +1,82 @@
+
+### 1. USER - GET cars (очікуємо 200 OK)
+GET http://localhost:8080/cars
+Authorization: Basic user user123
+
+### 2. USER - POST car (очікуємо 403 Forbidden)
+POST http://localhost:8080/cars
+Authorization: Basic user user123
+Content-Type: application/json
+
+{
+  "brand": "Honda",
+  "model": "Civic",
+  "year": 2023
+}
+
+### 3. ADMIN - GET cars (очікуємо 200 OK)
+GET http://localhost:8080/cars
+Authorization: Basic admin admin123
+
+### 4. ADMIN - POST car (очікуємо 201 Created)
+POST http://localhost:8080/cars
+Authorization: Basic admin admin123
+Content-Type: application/json
+
+{
+  "brand": "BMW",
+  "model": "X5",
+  "year": 2023
+}
+
+> {%
+    client.global.set("adminCarId", response.body.id);
+%}
+
+### 5. ADMIN - PUT car (очікуємо 200 OK)
+PUT http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic admin admin123
+Content-Type: application/json
+
+{
+  "brand": "BMW",
+  "model": "X6",
+  "year": 2024
+}
+
+### 6. ADMIN - DELETE car (очікуємо 403 Forbidden)
+DELETE http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic admin admin123
+
+### 7. SUPERUSER - POST car (очікуємо 201 Created)
+POST http://localhost:8080/cars
+Authorization: Basic superuser super123
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "RAV4",
+  "year": 2024
+}
+
+> {%
+    client.global.set("superuserCarId", response.body.id);
+%}
+
+### 8. SUPERUSER - PUT car (очікуємо 200 OK)
+PUT http://localhost:8080/cars/{{superuserCarId}}
+Authorization: Basic superuser super123
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "Camry",
+  "year": 2025
+}
+
+### 9. SUPERUSER - DELETE car (очікуємо 204 No Content)
+DELETE http://localhost:8080/cars/{{superuserCarId}}
+Authorization: Basic superuser super123
+
+### 10. ANONYMOUS - GET cars (очікуємо 401 Unauthorized)
+GET http://localhost:8080/cars
