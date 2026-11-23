@@ -1,0 +1,8 @@
+### Get JWT Token - USER
+POST http://localhost:8080/auth/token
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "user123"
+}
