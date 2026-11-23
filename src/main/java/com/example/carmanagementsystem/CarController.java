@@ -3,6 +3,7 @@ package com.example.carmanagementsystem;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -15,17 +16,20 @@ public class CarController {
         this.carRepository = carRepository;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERUSER')")
     @PostMapping
     public ResponseEntity<Car> createCar(@RequestBody Car car) {
         Car savedCar = carRepository.save(car);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPERUSER')")
     @GetMapping
     public List<Car> getAllCars() {
         return carRepository.findAll();
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPERUSER')")
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable String id) {
         return carRepository.findById(id)
@@ -33,9 +37,13 @@ public class CarController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERUSER')")
     @PutMapping("/{id}")
-    public ResponseEntity<Car> updateCar(@PathVariable String id, @RequestBody Car car) {
-        if(!carRepository.existsById(id)){
+    public ResponseEntity<Car> updateCar(
+            @PathVariable String id,
+            @RequestBody Car car
+    ) {
+        if (!carRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
 
@@ -45,6 +53,7 @@ public class CarController {
         return ResponseEntity.ok(updatedCar);
     }
 
+    @PreAuthorize("hasRole('SUPERUSER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable String id) {
         if (!carRepository.existsById(id)) {

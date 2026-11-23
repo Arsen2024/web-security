@@ -17,9 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -59,41 +61,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
-    ) {
+    ) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/cars",
-                                "/cars/**"
-                        ).hasAnyRole(
-                                "USER",
-                                "ADMIN",
-                                "SUPERUSER"
-                        )
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/cars"
-                        ).hasAnyRole(
-                                "ADMIN",
-                                "SUPERUSER"
-                        )
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/cars/**"
-                        ).hasAnyRole(
-                                "ADMIN",
-                                "SUPERUSER"
-                        )
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/cars/**"
-                        ).hasRole("SUPERUSER")
-
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

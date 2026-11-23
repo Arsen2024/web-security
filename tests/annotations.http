@@ -1,0 +1,120 @@
+
+### 0. Get CSRF Token
+GET http://localhost:8080/csrf
+Authorization: Basic admin admin123
+Accept: application/json
+
+> {%
+    client.global.set("csrfToken", response.body["token"]);
+%}
+
+###
+
+### 1. GET All Cars - USER
+GET http://localhost:8080/cars
+Authorization: Basic user user123
+Accept: application/json
+
+###
+
+### 2. GET All Cars - ADMIN
+GET http://localhost:8080/cars
+Authorization: Basic admin admin123
+Accept: application/json
+
+###
+
+### 3. GET One Car - SUPERUSER
+GET http://localhost:8080/cars/6ab9022ce0bb4abaad270d67
+Authorization: Basic superuser super123
+Accept: application/json
+
+###
+
+### 4. CREATE Car - USER (Forbidden)
+POST http://localhost:8080/cars
+Authorization: Basic user user123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+
+{
+  "brand": "BMW",
+  "model": "X5",
+  "year": 2024
+}
+
+###
+
+### 5. CREATE Car - ADMIN
+POST http://localhost:8080/cars
+Authorization: Basic admin admin123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+
+{
+  "brand": "Audi",
+  "model": "A6",
+  "year": 2025
+}
+
+> {%
+    client.global.set("adminCarId", response.body["id"]);
+%}
+
+###
+
+### 6. CREATE Car - SUPERUSER
+POST http://localhost:8080/cars
+Authorization: Basic superuser super123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+
+{
+  "brand": "Mercedes-Benz",
+  "model": "E-Class",
+  "year": 2025
+}
+
+###
+
+### 7. UPDATE Car - USER (Forbidden)
+PUT http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic user user123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+
+{
+  "brand": "Audi",
+  "model": "A7",
+  "year": 2026
+}
+
+###
+
+### 8. UPDATE Car - ADMIN
+PUT http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic admin admin123
+X-XSRF-TOKEN: {{csrfToken}}
+Content-Type: application/json
+
+{
+  "brand": "Audi",
+  "model": "A8",
+  "year": 2026
+}
+
+###
+
+### 9. DELETE Car - ADMIN (Forbidden)
+DELETE http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic admin admin123
+X-XSRF-TOKEN: {{csrfToken}}
+
+###
+
+### 10. DELETE Car - SUPERUSER
+DELETE http://localhost:8080/cars/{{adminCarId}}
+Authorization: Basic superuser super123
+X-XSRF-TOKEN: {{csrfToken}}
+
+###
